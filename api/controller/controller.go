@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"os"
 
 	"application/datamodels"
 	"application/interceptor"
@@ -94,6 +96,15 @@ func main() {
 	applicationController := GinController{ *persistantlayer.InitiateGinInterface() }
 
 	server := gin.Default()
+
+	logfile, err := os.Create("app.log")
+	defer logfile.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.SetOutput(logfile)
+	log.Println("Starting the application...")
 
 	server.POST("/user", applicationController.HttpPost)
 	server.GET("/user", applicationController.HttpGetAll)
