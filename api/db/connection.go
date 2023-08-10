@@ -1,6 +1,7 @@
 package db
 
 import (
+	"os"
 	"database/sql"
 
 	_ "github.com/lib/pq"
@@ -13,7 +14,6 @@ import (
 )
 
 var (
-	POSTGRES_DATABASE_CONNECTION_STRING string = "host=localhost port=5432 user=rohan.savalgi password=root dbname=user_postgres_database sslmode=disable"
 	Db *gorm.DB
 )
 
@@ -21,11 +21,13 @@ var CreateConnection = func () {
 	defer logger.ThrowCommonLog("db : Postgres sql is connected")
 
 	// actual connection to the postgres db
-	db, dbOpeningError := sql.Open("postgres", POSTGRES_DATABASE_CONNECTION_STRING)
+	db, dbOpeningError := sql.Open("postgres", os.Getenv("POSTGRES_DATABASE_CONNECTION_STRING"))
 
 	// to set the max idle connections
 	// db.SetMaxIdleConns(10)
-	logger.ThrowErrorLog(dbOpeningError)
+	if dbOpeningError != nil {
+		logger.ThrowErrorLog(dbOpeningError)
+	}
 
 	// to ping the database whether they are working or not
 	dbOpeningError = db.Ping()
@@ -42,5 +44,7 @@ var CreateConnection = func () {
 	})
 
 	Db = gormDB
-	logger.ThrowErrorLog(err)
+	if err != nil {
+		logger.ThrowErrorLog(err)
+	}
 }

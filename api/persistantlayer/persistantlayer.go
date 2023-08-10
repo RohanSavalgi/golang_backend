@@ -171,7 +171,6 @@ func (pgi PostgresInterface) CreateRow(c *gin.Context) error {
 }
 
 func (pgi PostgresInterface) GetAll() ([]datamodels.Row, error) {
-	logger.ThrowDebugLog("Entered the persistant layer")
 	allUser := []datamodels.Row{}
 	pgi.postgresDb.Table("myusers").Find(&allUser)
 	fmt.Println(allUser)
@@ -207,7 +206,7 @@ func (pgi PostgresInterface) DeleteRow(c *gin.Context) error {
 	if exists := pgi.postgresDb.Table("myusers").Find(userForDeletion); exists == nil {
 		return errors.New("No user with this ID")
 	}
-
+	logger.ThrowDebugLog(userForDeletion)
 	deletionLog := pgi.postgresDb.Table("myusers").Delete(&userForDeletion)
 	if deletionLog != nil {
 		return errors.New("There was some error while deleting the user in database")

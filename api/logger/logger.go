@@ -23,7 +23,7 @@ func init() {
 	logger := logrus.New()
 	logger.Formatter = &logrus.JSONFormatter{ PrettyPrint: true }
 
-	LoggerFile, LoggerFileOpeningError := os.OpenFile("loggerFile.txt", os.O_APPEND | os.O_CREATE | os.O_WRONLY, 0666)
+	LoggerFile, LoggerFileOpeningError := os.OpenFile("loggerFile.txt", os.O_WRONLY | os.O_CREATE, 0755)
 	if LoggerFileOpeningError != nil {
 		log.Fatal("The log file was not created")
 		return

@@ -1,23 +1,21 @@
-package main
+package controller
 
 import (
 	"fmt"
 
-	"application/db"
 	"application/interceptor"
 	"application/logger"
 	"application/persistantlayer"
 
 	"github.com/gin-gonic/gin"
-	"github.com/stretchr/testify/assert"
 )
 
 type PgDbController struct {
-	pgControllerHandler persistantlayer.PostgresInterface
+	PgControllerHandler persistantlayer.PostgresInterface
 }
 
 func (pgControllerObject PgDbController) HttpPost(c *gin.Context)  {
-	err := pgControllerObject.pgControllerHandler.CreateRow(c)
+	err := pgControllerObject.PgControllerHandler.CreateRow(c)
 	if err != nil {
 		logger.ThrowErrorLog(err)
 		interceptor.SendErrRes(c, err, "Failure to create a user", 500)
@@ -29,7 +27,7 @@ func (pgControllerObject PgDbController) HttpPost(c *gin.Context)  {
 }
 
 func (pgControllerObject PgDbController) HttpGetAll(c *gin.Context) {
-	allUser, err := pgControllerObject.pgControllerHandler.GetAll()
+	allUser, err := pgControllerObject.PgControllerHandler.GetAll()
 	if err != nil {
 		interceptor.SendErrRes(c, err, "Could not find the users at this moment.", 404)
 		logger.ThrowErrorLog("[Waring] : All user retrival failed.")
@@ -40,7 +38,7 @@ func (pgControllerObject PgDbController) HttpGetAll(c *gin.Context) {
 }
 
 func (pgControllerObject PgDbController) HttpPatch(c *gin.Context) {
-	err := pgControllerObject.pgControllerHandler.UpdateRow(c)
+	err := pgControllerObject.PgControllerHandler.UpdateRow(c)
 	if err !=  nil {
 		interceptor.SendErrRes(c, err, "Could not update the user at this moment.", 500)
 		logger.ThrowErrorLog("[Waring] : User info failed to be updated.")
@@ -51,7 +49,7 @@ func (pgControllerObject PgDbController) HttpPatch(c *gin.Context) {
 }
 
 func (pgControllerObject PgDbController) HttpDelete(c *gin.Context) {
-	err := pgControllerObject.pgControllerHandler.DeleteRow(c)
+	err := pgControllerObject.PgControllerHandler.DeleteRow(c)
 	if err != nil {
 		interceptor.SendErrRes(c, err, "Could not delete the user at this moment.", 500)
 		logger.ThrowErrorLog("[Waring] : User info failed to be deleted.")
@@ -108,18 +106,4 @@ func (ginControllerObject GinController) HttpDelete(c *gin.Context) {
 	}
 	interceptor.SendSuccessRes(c, "Deleted the user successfully", 200)
 	logger.ThrowDebugLog("User was deleted.")
-
-}
-
-func main() {
-	db.CreateConnection()
-	applicationController := PgDbController{ pgControllerHandler: *persistantlayer.PostgresInitilization() }
-	server := gin.Default()
-
-	server.POST("/user", applicationController.HttpPost)
-	server.GET("/user", applicationController.HttpGetAll)
-	server.PUT("/user", applicationController.HttpPatch)
-	server.DELETE("/user/:id", applicationController.HttpDelete)
-
-	server.Run()
 }
