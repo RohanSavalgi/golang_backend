@@ -1,0 +1,25 @@
+{
+  "level": "info",
+  "msg": "db : Postgres sql is connected",
+  "time": "2023-08-11T11:44:53+05:30"
+}
+{
+  "level": "debug",
+  "msg": "Shared : Initializing server",
+  "time": "2023-08-11T11:44:53+05:30"
+}
+{
+  "level": "debug",
+  "msg": "Setting up the routes for the server.",
+  "time": "2023-08-11T11:44:53+05:30"
+}
+{
+  "level": "debug",
+  "msg": "Get api called and all user info is passed",
+  "time": "2023-08-11T11:43:47+05:30"
+}
+{
+  "level": "debug",
+  "msg": "Get api called and all user info is passed",
+  "time": "2023-08-11T11:43:57+05:30"
+}

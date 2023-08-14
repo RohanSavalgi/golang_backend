@@ -1,9 +1,7 @@
 package interceptor
 
-const (
-	DEFAULT_ERROR_MSG         = "Something went wrong - (default)"
-	DEFAULT_HTTP_ERROR_CODE   = 500
-	DEFAULT_HTTP_SUCCESS_CODE = 200
+import (
+	"os"
 )
 
 type Response interface {
@@ -22,7 +20,7 @@ type response struct {
 
 func CreateResponse(success bool, data interface{}, err interface{}, errorMessage string) Response {
 	if !success && errorMessage == "" {
-		errorMessage = DEFAULT_ERROR_MSG
+		errorMessage = os.Getenv("DEFAULT_ERROR_MSG")
 	}
 	return &response{
 		ResData:         data,

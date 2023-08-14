@@ -20,19 +20,24 @@ var (
 
 var (
 	GET_TEST_BODY = `{
-			"data": [
-			{
-				"ID": 1,
-				"Name": "panda",
-				"Email": "panda@betsol.com"
-			}
-			],
-			"success": true,
-			"error": null,
-			"message": ""
-		}`
-	POST_REQUEST_BODY = `{
+		"data": [
+		  {
+			"ID": 1,
+			"Name": "rohan is the best",
+			"Email": "rohan@rohan.com"
+		  },
+		  {
 			"ID": 2,
+			"Name": "panda",
+			"Email": "panda@betsol.com"
+		  }
+		],
+		"success": true,
+		"error": null,
+		"message": ""
+	  }`
+	POST_REQUEST_BODY = `{
+			"ID": 3,
 			"Name": "panda",
 			"Email": "panda@betsol.com"
 	}`
@@ -94,7 +99,7 @@ func TestHttpDelete(t *testing.T) {
 	db.CreateConnection()
 	applicationController := controller.PgDbController{ PgControllerHandler: *persistantlayer.PostgresInitilization() }
 	
-	testRecorder, testErrors := applicationTesting.PatchRequest("/test-user", "/test-user", applicationController.HttpDelete , POST_REQUEST_BODY)
+	testRecorder, testErrors := applicationTesting.PatchRequest("/test-user", "/test-user", applicationController.HttpPatch , POST_REQUEST_BODY)
 	if testErrors != nil {
 		logger.ThrowErrorLog(testErrors)
 		return 
