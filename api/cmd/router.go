@@ -20,7 +20,7 @@ func serverRoutesSetupUp(router *gin.Engine) {
 	mainRouter := router.Group("/application") 
 	{
 		mainRouter.POST("/user", authMiddleware, middleware.VerifyContentType(middleware.ContentTypeJSON), applicationController.HttpPost)
-		mainRouter.GET("/user", authMiddleware, applicationController.HttpGetAll)
+		mainRouter.GET("/user", authMiddleware, auth.CheckPermission([]string{"read:user"},false), applicationController.HttpGetAll)
 		mainRouter.PUT("/user", authMiddleware, middleware.VerifyContentType(middleware.ContentTypeJSON),applicationController.HttpPatch)
 		mainRouter.DELETE("/user/:id", authMiddleware, applicationController.HttpDelete)
 	}

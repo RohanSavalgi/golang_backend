@@ -1,22 +1,20 @@
 package auth
 
 import (
-	"application/logger"
 	"context"
 	"net/http"
 	"net/url"
 	"os"
 	"time"
 
+	"application/interceptor"
+	"application/logger"
+
 	jwtmiddleware "github.com/auth0/go-jwt-middleware/v2"
 	"github.com/auth0/go-jwt-middleware/v2/jwks"
 	"github.com/auth0/go-jwt-middleware/v2/validator"
+	"github.com/gin-gonic/gin"
 )
-
-// CustomClaims contains custom data we want from the token.
-type CustomClaims struct {
-	Scope string `json:"scope"`
-}
 
 // Validate does nothing for this example, but we need
 // it to satisfy validator.CustomClaims interface.
@@ -65,4 +63,22 @@ func AuthenticationMiddleware() func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return middleware.CheckJWT(next)
 	}
+}
+
+func CheckPermission(permissions []string, CheckAllPermissions bool) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		token := c.Request.Context().Value(jwtmiddleware.ContextKey{}).(*validator.ValidatedClaims)
+		claims := token.CustomClaims.(*CustomClaims)
+		// these are the permissions which i have specified in the backend 
+		// so that any user who wishes to use these has to have these roles attached to him.
+		if len(permissions) != 0 {
+			if !claims.IsAuthorized(permissions, CheckAllPermissions) {
+				logger.ThrowErrorLog("insufficient permissions")
+				interceptor.SendErrRes(c, "unathorized request", "insufficient permissions", http.StatusUnauthorized)
+				return
+			}
+		}
+		c.Next()
+	}
+
 }
