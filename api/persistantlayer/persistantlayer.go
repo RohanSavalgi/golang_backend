@@ -3,7 +3,6 @@ package persistantlayer
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"strconv"
 
@@ -78,7 +77,6 @@ func (ginInterfaceFunctionObject GinInterfaceFunction) CreateRow(c *gin.Context)
 	}
 
 	if _,exists := ginInterfaceFunctionObject.ginStore[creatorData.ID]; exists {
-		fmt.Println("Returned from here")
 		return errors.New("The User already exists with this ID")
 	}
 
@@ -102,7 +100,6 @@ func (ginInterfaceFunctionObject GinInterfaceFunction) GetAll() ([]datamodels.Ro
 	allUser := []datamodels.Row{}
 	var alterUser any
 	db.Db.Table("myusers").Find(alterUser)
-	fmt.Println(alterUser)
 	return allUser, nil
 }
 
@@ -128,7 +125,6 @@ func (ginInterfaceFunctionObject GinInterfaceFunction) UpdateRow(c *gin.Context)
 
 func (ginInterfaceFunctionObject GinInterfaceFunction) DeleteRow(c *gin.Context) error {
 	index, _ := strconv.Atoi(c.Param("id"))
-	fmt.Println(index)
 	if _, exists := ginInterfaceFunctionObject.ginStore[index]; !exists {
 		return errors.New("No user with this ID")
 	}
@@ -173,7 +169,6 @@ func (pgi PostgresInterface) CreateRow(c *gin.Context) error {
 func (pgi PostgresInterface) GetAll() ([]datamodels.Row, error) {
 	allUser := []datamodels.Row{}
 	pgi.postgresDb.Table("myusers").Find(&allUser)
-	fmt.Println(allUser)
 	return allUser, nil
 }
 

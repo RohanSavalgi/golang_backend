@@ -1,42 +1,68 @@
 package auth
 
-import "github.com/gin-gonic/gin"
+import (
+	"application/logger"
+	"context"
+	"net/http"
+	"net/url"
+	"os"
+	"time"
 
-func auth() gin.HandlerFunc {
-	return func(c *gin.Context) {
+	jwtmiddleware "github.com/auth0/go-jwt-middleware/v2"
+	"github.com/auth0/go-jwt-middleware/v2/jwks"
+	"github.com/auth0/go-jwt-middleware/v2/validator"
+)
 
-		return c.Next()
-	}
+// CustomClaims contains custom data we want from the token.
+type CustomClaims struct {
+	Scope string `json:"scope"`
 }
 
-// func CheckBearerToken(token string) (claims map[string]interface{}, err error) {
-// 	// Get the authorization header from the request
-// 	authHeader := r.Header.Get("Authorization")
-  
-// 	// Check if the authorization header is present
-// 	if authHeader == "" {
-// 	  return nil, errors.New("Authorization header is not present")
-// 	}
-  
-// 	// Check if the authorization header starts with "Bearer "
-// 	if !strings.HasPrefix(authHeader, "Bearer ") {
-// 	  return nil, errors.New("Authorization header is not in the correct format")
-// 	}
-  
-// 	// Get the token from the authorization header
-// 	token = strings.TrimPrefix(authHeader, "Bearer ")
-  
-// 	// Validate the token
-// 	claims, err = jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
-// 	  // Get the public key from the issuer URL
-// 	  key, err := jwks.Get(token.Header["kid"].(string))
-// 	  if err != nil {
-// 		return nil, err
-// 	  }
-  
-// 	  // Verify the token signature with the public key
-// 	  return key, token.Verify(key)
-// 	})
-  
-// 	return claims, err
-//   }
+// Validate does nothing for this example, but we need
+// it to satisfy validator.CustomClaims interface.
+func (c CustomClaims) Validate(ctx context.Context) error {
+	return nil
+}
+
+// EnsureValidToken is a middleware that will check the validity of our JWT.
+func AuthenticationMiddleware() func(next http.Handler) http.Handler {
+	issuerURL, err := url.Parse("https://" + os.Getenv("APPLICATION_DOMAIN") + "/")
+	if err != nil {
+		logger.ThrowErrorLog("Failed to parse the issuer url")
+	}
+
+	provider := jwks.NewCachingProvider(issuerURL, 5*time.Minute)
+
+	jwtValidator, err := validator.New(
+		provider.KeyFunc,
+		validator.RS256,
+		issuerURL.String(),
+		[]string{os.Getenv("AUTH0_USER_GET_API")},
+		validator.WithCustomClaims(
+			func() validator.CustomClaims {
+				return &CustomClaims{}
+			},
+		),
+		validator.WithAllowedClockSkew(time.Minute),
+	)
+	if err != nil {
+		logger.ThrowErrorLog("Failed to set up the jwt validator")
+	}
+
+	errorHandler := func(w http.ResponseWriter, r *http.Request, err error) {
+		logger.ThrowErrorLog("Encountered error while validating JWT")
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte(`{"message":"Failed to validate JWT."}`))
+	}
+
+	middleware := jwtmiddleware.New(
+		jwtValidator.ValidateToken,
+		jwtmiddleware.WithErrorHandler(errorHandler),
+	)
+
+	return func(next http.Handler) http.Handler {
+		return middleware.CheckJWT(next)
+	}
+}

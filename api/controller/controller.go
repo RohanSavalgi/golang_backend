@@ -1,8 +1,6 @@
 package controller
 
 import (
-	"fmt"
-
 	"application/interceptor"
 	"application/logger"
 	"application/persistantlayer"
@@ -65,7 +63,6 @@ type GinController struct {
 
 func (ginControllerObject GinController) HttpPost(c *gin.Context)  {
 	err := ginControllerObject.ginControllerHandler.CreateRow(c)
-	fmt.Println(err)
 	if err != nil {
 		interceptor.SendErrRes(c, err, "Failure to create a user", 200)
 		logger.ThrowErrorLog("[Waring] : User info failed to be created.")
