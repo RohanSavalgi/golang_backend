@@ -16,12 +16,17 @@ func serverRoutesSetupUp(router *gin.Engine) {
 
 	applicationController := controller.PgDbController{ PgControllerHandler: *persistantlayer.PostgresInitilization()}
 	authMiddleware := adapter.Wrap(auth.AuthenticationMiddleware())
+	/*
+	Owner - Highest - Create, Read, Update
+	Admin - Middle - Read, Update
+	Employee - Lowest - Read
 
+	*/
 	mainRouter := router.Group("/application") 
 	{
-		mainRouter.POST("/user", authMiddleware, middleware.VerifyContentType(middleware.ContentTypeJSON), applicationController.HttpPost)
-		mainRouter.GET("/user", authMiddleware, auth.CheckPermission([]string{"read:user"},false), applicationController.HttpGetAll)
-		mainRouter.PUT("/user", authMiddleware, middleware.VerifyContentType(middleware.ContentTypeJSON),applicationController.HttpPatch)
+		mainRouter.GET("/user", authMiddleware, auth.CheckPermission([]string{"read:user"}, true), applicationController.HttpGetAll)
+		mainRouter.POST("/user", authMiddleware, auth.CheckPermission([]string{"create:user"}, true), middleware.VerifyContentType(middleware.ContentTypeJSON), applicationController.HttpPost)
+		mainRouter.PUT("/user", authMiddleware, auth.CheckPermission([]string{"update:user"}, true), middleware.VerifyContentType(middleware.ContentTypeJSON),applicationController.HttpPatch)
 		mainRouter.DELETE("/user/:id", authMiddleware, applicationController.HttpDelete)
 	}
 }
