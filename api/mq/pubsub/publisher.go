@@ -58,6 +58,6 @@ func (p *publisher) PublishMessageWithAttr(msg string, attributes map[string]str
 	if err != nil {
 		return nil, fmt.Errorf("error: %v", err)
 	}
-	fmt.Printf("Published a message; msg ID : %s\n", id)
+	fmt.Printf("Published a message: msg ID : %s\n", id)
 	return &id, nil
 }

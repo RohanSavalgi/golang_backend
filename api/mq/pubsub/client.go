@@ -61,7 +61,7 @@ var CreateClient = func() Client {
 		if pubsubClient == nil {
 			ctx := context.Background()
 
-			c, err := pubsub.NewClient(ctx, GCP_PROJECT_ID)
+			c, err := pubsub.NewClient(ctx, "rohanpubsubproject")
 			if err != nil {
 				pubsubClient = nil 
 				logger.ThrowErrorLog("Failed to create for the project with id")
@@ -83,7 +83,7 @@ func (c *client) GetSubscriber(subId string) Subscriber {
 }
 
 func (c *client) GetPublisher(topicId string) Publisher {
-	t := c.client.Topic(topicId)
+	t := c.client.Topic("testtopic")
 	if t == nil {
 		logger.ThrowErrorLog("Failed to get topic")
 	}

@@ -2,9 +2,9 @@ package main
 
 import (
 	"application/db"
+	"application/mq/pubsub"
 	"application/server"
 	envLoader "application/server"
-	"application/mq/pubsub"
 )
 
 func init() {
@@ -17,7 +17,13 @@ func main() {
 
 	serverRoutesSetupUp(mainServer)
 
-	go pubsub.PublishMessageFromGoRoutine()
+	// go pubsub.PublishMessageFromGoRoutine("tommy")
+
+	go pubsub.RecieveMessageFromGoRoutine()
+
+	// go pubsub.OtherPublish()
+
+	// go pubsub.Recorder()
 
 	server.Listen(mainServer)
 }
