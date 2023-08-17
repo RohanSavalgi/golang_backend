@@ -4,6 +4,7 @@ import (
 	"application/db"
 	"application/server"
 	envLoader "application/server"
+	"application/mq/pubsub"
 )
 
 func init() {
@@ -15,6 +16,8 @@ func main() {
 	mainServer := server.InitServer()
 
 	serverRoutesSetupUp(mainServer)
+
+	go pubsub.PublishMessageFromGoRoutine()
 
 	server.Listen(mainServer)
 }
