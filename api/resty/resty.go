@@ -1,11 +1,12 @@
 package resty
 
-import(
+import (
+	"encoding/json"
 	"fmt"
 	"sync"
-	"encoding/json"
 
 	"application/logger"
+
 	resty "github.com/go-resty/resty/v2"
 )
 

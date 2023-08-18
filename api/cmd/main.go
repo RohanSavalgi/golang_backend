@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"application/db"
@@ -14,6 +15,13 @@ import (
 func init() {
 	envLoader.LoadEnv()
 	db.CreateConnection()
+}
+
+type responseFromHttp struct {
+	data string `json:"data"`
+	success bool `json:"success"`
+	error string `json:"errror"`
+	message string `json:"message"`
 }
 
 func main() {
@@ -45,5 +53,7 @@ func checkApiFromResty() {
 	if err != nil {
 		logger.ThrowErrorLog("Error in checking response.")
 	}
-	logger.ThrowDebugLog(string(checkResponseOutput))
+	var newObj responseFromHttp
+	err = json.Unmarshal(checkResponseOutput, newObj)
+	logger.ThrowDebugLog(newObj.data)
 }
