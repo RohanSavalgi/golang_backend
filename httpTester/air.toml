@@ -1,6 +1,0 @@
-# air.toml
-root = "."                # Directory where the main.go file resides
-tmp_dir = "tmp"           # Temp directory for build artifacts
-build_args = ["-o", "tmp/main"] # Build command arguments
-delay = 1000              # Delay in milliseconds before the restart
-exclude_dirs = ["tmp"]    # Directories to exclude from monitoring
