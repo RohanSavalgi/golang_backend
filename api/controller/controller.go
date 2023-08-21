@@ -12,6 +12,11 @@ type PgDbController struct {
 	PgControllerHandler persistantlayer.PostgresInterface
 }
 
+// @Summary Protected Route
+// @Description Access a protected route.
+// @Tags Protected
+// @Success 200 {object} interface{}
+// @Router /application/user [get]
 func (pgControllerObject PgDbController) HttpPost(c *gin.Context)  {
 	err := pgControllerObject.PgControllerHandler.CreateRow(c)
 	if err != nil {

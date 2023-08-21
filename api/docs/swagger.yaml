@@ -1,0 +1,23 @@
+info:
+  contact: {}
+  description: Contains all the apis for user (postgres database).
+  title: User Application APIs
+  version: "1.0"
+paths:
+  /application/user:
+    get:
+      description: Access a protected route.
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+      summary: Protected Route
+      tags:
+      - Protected
+securityDefinitions:
+  JWT:
+    in: header
+    name: Bearer
+    type: apiKey
+swagger: "2.0"

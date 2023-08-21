@@ -1,18 +1,21 @@
-package main
+package cmd
 
 import (
 	"application/auth"
 	"application/controller"
 	"application/logger"
 	"application/middleware"
-	"application/persistantlayer"
 	"application/mq/pubsub"
+	"application/persistantlayer"
 
-	"github.com/gin-gonic/gin"
 	adapter "github.com/gwatts/gin-adapter"
+	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files" // Updated import path
+	ginSwagger "github.com/swaggo/gin-swagger"
+	_ "application/docs"
 )
 
-func serverRoutesSetupUp(router *gin.Engine) {
+func ServerRoutesSetupUp(router *gin.Engine) {
 	logger.ThrowDebugLog("Setting up the routes for the server.")
 
 	applicationController := controller.PgDbController{ PgControllerHandler: *persistantlayer.PostgresInitilization()}
@@ -23,6 +26,9 @@ func serverRoutesSetupUp(router *gin.Engine) {
 	Employee - Lowest - Read
 
 	*/
+
+	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	mainRouter := router.Group("/application") 
 	{
 		mainRouter.GET("/user", authMiddleware, auth.CheckPermission([]string{"read:user"}, true), pubsub.RecorderMiddleware("GET", "USER"), applicationController.HttpGetAll)

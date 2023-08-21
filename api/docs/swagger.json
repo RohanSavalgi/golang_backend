@@ -1,0 +1,35 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Contains all the apis for user (postgres database).",
+        "title": "User Application APIs",
+        "contact": {},
+        "version": "1.0"
+    },
+    "paths": {
+        "/application/user": {
+            "get": {
+                "description": "Access a protected route.",
+                "tags": [
+                    "Protected"
+                ],
+                "summary": "Protected Route",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "JWT": {
+            "type": "apiKey",
+            "name": "Bearer",
+            "in": "header"
+        }
+    }
+}
