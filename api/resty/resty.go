@@ -67,7 +67,6 @@ func (rc *restyClient) CheckResponse(restyRes *resty.Response, err error, expect
 		logger.ThrowErrorLog(err)
 		return nil, err
 	}
-
 	if restyRes.StatusCode() != expectedStatusCode {
 		logger.ThrowDebugLog("Did not find the expected status code!")
 		logger.ThrowDebugLog(restyRes.StatusCode())

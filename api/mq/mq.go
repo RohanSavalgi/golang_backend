@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"os"
+	"strings"
 
 	dto "application/dto/organisation"
 	userDto "application/dto/user"
@@ -75,14 +76,37 @@ func CreateNewUser(name string, email string) (interface{}, error) {
 	requestBody := userDto.CreateUserRequestModel{
 		Name: name,
 		Email: email,
-		Connection: "",
-		Password: "random",
+		Connection: "Username-Password-Authentication",
+		Password: "Guru!cha1",
 	}
+
+	userExistsCheck, userExistsCheckError := rs.Send(
+		rs.GetClient().R().
+			SetAuthToken(os.Getenv("APPLICATION_ALL_ACCESS_TOKEN")).
+			SetQueryParam("email", strings.ToLower(requestBody.Email)),
+		"https://" + os.Getenv("APPLICATION_DOMAIN") + "/api/v2/users-by-email",
+		resty.GET,
+	)
+
+	userInBytes, err := rs.CheckResponse(userExistsCheck, userExistsCheckError, http.StatusOK, resty.AUTH0)
+	if err != nil {
+		return nil, errors.New("Error in checking of duplicate user.")
+	}
+
+	duplicatedUser := []userDto.CreateUserResponseModel{}
+	if err := json.Unmarshal(userInBytes, &duplicatedUser); err != nil {
+		return nil, errors.New("Error in unmarshalling the users data")
+	}
+
+	if len(duplicatedUser) > 0 {
+		return &duplicatedUser[0], errors.New("The user alredy exists, skipping the user creation process")
+	}
+
 	userCreationReq, err := rs.Send(
 		rs.GetClient().R().
 			SetAuthToken(os.Getenv("APPLICATION_ALL_ACCESS_TOKEN")).
 			SetBody(requestBody),
-		"https://" + os.Getenv("APPLICATION_DOMAIN") + "/api/v2/user",
+		"https://" + os.Getenv("APPLICATION_DOMAIN") + "/api/v2/users",
 		resty.POST,
 	)
 
@@ -91,11 +115,36 @@ func CreateNewUser(name string, email string) (interface{}, error) {
 		return nil, err
 	}
 
-	userCreationResponse := userDto.CreateUserRequestModel{}
+	userCreationResponse := userDto.CreateUserResponseModel{}
 	if err := json.Unmarshal(responseInBytes, &userCreationResponse); err != nil {
-		logger.ThrowErrorLog("Error in unmarshalling data!")
 		return nil, err
 	}
 
 	return userCreationResponse, nil
+}
+
+func ChangePassword(email string) (interface{}, error) {
+	rs := resty.GetRestyClient()
+
+	changePassData := userDto.ChangePasswordRequestModel {
+		ClientId: "kTWqSEwsBNVgdvh2BJmxzTWACq80dDG6",
+		Email: email,
+		Connection: "Username-Password-Authentication",
+	}
+
+	changePass, err := rs.Send(
+		rs.GetClient().R().
+			SetAuthToken(os.Getenv("APPLICATION_ALL_ACCESS_TOKEN")).
+			SetBody(changePassData),
+		"https://" + os.Getenv("APPLICATION_DOMAIN") + "/dbconnections/change_password",
+		resty.POST,
+	)
+
+	resInBytes, err := rs.CheckResponse(changePass, err, http.StatusOK, resty.AUTH0)
+	if err != nil {
+		return nil, err
+	}
+
+	res := userDto.ChangePasswordResponseModel(string(resInBytes))
+	return &res, nil
 }

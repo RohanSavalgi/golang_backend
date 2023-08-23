@@ -30,7 +30,13 @@ func main() {
 
 	cmd.ServerRoutesSetupUp(mainServer)
 
-	if orgId, err :=  mq.CreateNewUser("nascar", "nascar@gmail.com"); err != nil {
+	// if orgId, err :=  mq.CreateNewUser("collegeEmail", "1rn19is121.rohansanjaysavalgi@gmail.com"); err != nil {
+	// 	logger.ThrowErrorLog(err)
+	// } else {
+	// 	logger.ThrowDebugLog(orgId)
+	// }
+
+	if orgId, err :=  mq.ChangePassword("1rn19is121.rohansanjaysavalgi@gmail.com"); err != nil {
 		logger.ThrowErrorLog(err)
 	} else {
 		logger.ThrowDebugLog(orgId)
