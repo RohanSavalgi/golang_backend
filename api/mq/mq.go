@@ -1,53 +1,101 @@
 package mq
 
 import (
-	"strings"
+	"encoding/json"
+	"errors"
+	"net/http"
+	"os"
 
+	dto "application/dto/organisation"
+	userDto "application/dto/user"
 	"application/logger"
 	"application/resty"
 )
 
-var(
-	URI = "https://" + "dev-k1qotymam1ust8za.us.auth0.com" + "/api/v2/organizations"
-)
-
-func CreateNewUserInAuth0() {
+func CreateOranizationForUser(name string) (interface{}, error) {
+	miniOrgData := dto.CreateOrgRequestModel{
+		Name: name, 
+		DisplayName: name,
+	}
 	rs := resty.GetRestyClient()
-	payload := strings.NewReader(`{
-		"name": "new_rohan_org",
-		"display_name": "new_rohan_orgnew_rohan_org",
-		"branding": [
-			{
-				"logo_url": "",
-				"colors": [
-					{
-						"primary": "",
-						"page_background": ""
-					}
-				]
-			}
-		],
-		"metadata": [
-			{}
-		],
-		"enabled_connections": [
-		]
-	}`)
 
-	_, err := rs.Send(
-		rs.GetClient().R().SetHeader("Content-Type", "application/json").
-		SetHeader("Authorization", "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlVaalBNT0FBaHEtcmxwbnU2SDZSRyJ9.eyJpc3MiOiJodHRwczovL2Rldi1rMXFvdHltYW0xdXN0OHphLnVzLmF1dGgwLmNvbS8iLCJzdWIiOiJrVFdxU0V3c0JOVmdkdmgyQkpteHpUV0FDcTgwZERHNkBjbGllbnRzIiwiYXVkIjoiaHR0cDovLzEyNy4wLjAuMTo4MDgwL2FwcGxpY2F0aW9uL3VzZXIiLCJpYXQiOjE2OTI1ODczNDksImV4cCI6MTY5MjY3Mzc0OSwiYXpwIjoia1RXcVNFd3NCTlZnZHZoMkJKbXh6VFdBQ3E4MGRERzYiLCJzY29wZSI6InJlYWQ6dXNlciB1cGRhdGU6dXNlciBjcmVhdGU6dXNlciIsImd0eSI6ImNsaWVudC1jcmVkZW50aWFscyIsInBlcm1pc3Npb25zIjpbInJlYWQ6dXNlciIsInVwZGF0ZTp1c2VyIiwiY3JlYXRlOnVzZXIiXX0.QTcs65sXEHHv3mfXS8QH1tmKlNIlEF28EfGWLQi9-o8eMgZ8MqPBBF3b_ilzoR9cFjcBn55d9Y6hm5iBHqC8itLwFFja3kPCpXQyYx-fV_tYoWDyOcdOw1ddFC7YSlbH2EBFdeGmJn00JPz8qsgyE_1Guft5-IxgHhSfpLnsJPXTvnRxT3zQFoDWzHEHIZ6-nKQopIOo5AOwV-VJu1GT0L0KUwSbE6ZWeeKTER_9jIJouRSWZO8nmxITKSy8kogHOtYmhbDfhgtbD8iflsYZfzqMKDVCloXUTKCxWS1MKs8tbA3T2Y5A92oZpLOkPhxRi6ah7O686gfUcs1lEbHkuw").
-		SetHeader("Cache-Control", "no-cache").
-		SetBody(payload),
-		URI,
-		resty.POST,
-
+	organizationCheck, organizationCheckError := rs.Send(
+		rs.GetClient().R().
+			SetAuthToken(os.Getenv("APPLICATION_ALL_ACCESS_TOKEN")),
+			"https://" + os.Getenv("APPLICATION_DOMAIN") + "/api/v2/organizations/name/" + miniOrgData.Name,
+			resty.GET,
 	)
-	if err != nil {
-		logger.ThrowErrorLog(err)
-		return
+
+	if organizationCheckError != nil {
+		return nil, errors.New("Failed to check for duplicate organization name")
 	}
 
-	logger.ThrowDebugLog("Organization was created successfully!")
-	return 
+	if organizationCheck.StatusCode() != http.StatusNotFound {
+		orgCheck, err := rs.CheckResponse(organizationCheck, organizationCheckError, http.StatusOK, resty.AUTH0)
+		if err != nil {
+			logger.ThrowErrorLog("Error checking organization data in auth0")
+			return nil, err
+		}
+
+		result := dto.CreateOrgResponseModel{}
+		if err := json.Unmarshal(orgCheck, &result); err != nil {
+			logger.ThrowErrorLog("Error in unmarshalling data to check for duplicate organization")
+			return nil, err
+		}
+
+		logger.ThrowErrorLog("Organization with this name is already found! Contining with the next process")
+		return result, nil
+	}
+
+	restyRequest, restyRequestErr := rs.Send(
+		rs.GetClient().R().
+			SetAuthToken(os.Getenv("APPLICATION_ALL_ACCESS_TOKEN")).
+			SetBody(miniOrgData),
+			"https://" + os.Getenv("APPLICATION_DOMAIN") + "/api/v2/organizations",
+			resty.POST,
+		)
+
+	data, err := rs.CheckResponse(restyRequest, restyRequestErr, http.StatusCreated, resty.AUTH0)
+	if err != nil {
+		logger.ThrowErrorLog(err)
+	}
+
+
+	result := dto.CreateOrgResponseModel{}
+	if err := json.Unmarshal(data, &result); err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
+func CreateNewUser(name string, email string) (interface{}, error) {
+	rs := resty.GetRestyClient()
+
+	requestBody := userDto.CreateUserRequestModel{
+		Name: name,
+		Email: email,
+		Connection: "",
+		Password: "random",
+	}
+	userCreationReq, err := rs.Send(
+		rs.GetClient().R().
+			SetAuthToken(os.Getenv("APPLICATION_ALL_ACCESS_TOKEN")).
+			SetBody(requestBody),
+		"https://" + os.Getenv("APPLICATION_DOMAIN") + "/api/v2/user",
+		resty.POST,
+	)
+
+	responseInBytes, err := rs.CheckResponse(userCreationReq, err, http.StatusCreated, resty.AUTH0)
+	if err != nil {
+		return nil, err
+	}
+
+	userCreationResponse := userDto.CreateUserRequestModel{}
+	if err := json.Unmarshal(responseInBytes, &userCreationResponse); err != nil {
+		logger.ThrowErrorLog("Error in unmarshalling data!")
+		return nil, err
+	}
+
+	return userCreationResponse, nil
 }

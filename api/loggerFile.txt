@@ -1,30 +1,30 @@
 {
   "level": "info",
   "msg": "db : Postgres sql is connected",
-  "time": "2023-08-21T15:48:38+05:30"
+  "time": "2023-08-23T10:58:18+05:30"
 }
 {
   "level": "debug",
   "msg": "Shared : Initializing server",
-  "time": "2023-08-21T15:48:38+05:30"
+  "time": "2023-08-23T10:58:18+05:30"
 }
 {
   "level": "debug",
   "msg": "Setting up the routes for the server.",
-  "time": "2023-08-21T15:48:38+05:30"
+  "time": "2023-08-23T10:58:18+05:30"
+}
+{
+  "level": "debug",
+  "msg": "Did not find the expected status code!",
+  "time": "2023-08-23T10:58:20+05:30"
+}
+{
+  "level": "debug",
+  "msg": "404",
+  "time": "2023-08-23T10:58:20+05:30"
 }
 {
   "level": "error",
-  "msg": "Encountered error while validating JWT",
-  "time": "2023-08-21T15:48:55+05:30"
-}
-{
-  "level": "error",
-  "msg": "Encountered error while validating JWT",
-  "time": "2023-08-21T15:49:40+05:30"
-}
-{
-  "level": "error",
-  "msg": "Encountered error while validating JWT",
-  "time": "2023-08-21T15:50:01+05:30"
+  "msg": "The expected status code was not seen.",
+  "time": "2023-08-23T10:58:20+05:30"
 }

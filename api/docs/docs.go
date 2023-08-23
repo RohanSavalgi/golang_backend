@@ -18,6 +18,11 @@ const docTemplate = `{
     "paths": {
         "/application/user": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Access a protected route.",
                 "tags": [
                     "Protected"
@@ -33,21 +38,14 @@ const docTemplate = `{
                 }
             }
         }
-    },
-    "securityDefinitions": {
-        "JWT": {
-            "type": "apiKey",
-            "name": "Bearer",
-            "in": "header"
-        }
     }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "",
-	BasePath:         "",
+	Host:             "localhost:8080",
+	BasePath:         "/application",
 	Schemes:          []string{},
 	Title:            "User Application APIs",
 	Description:      "Contains all the apis for user (postgres database).",

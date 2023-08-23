@@ -1,3 +1,5 @@
+basePath: /application
+host: localhost:8080
 info:
   contact: {}
   description: Contains all the apis for user (postgres database).
@@ -12,12 +14,9 @@ paths:
           description: OK
           schema:
             type: object
+      security:
+      - BearerAuth: []
       summary: Protected Route
       tags:
       - Protected
-securityDefinitions:
-  JWT:
-    in: header
-    name: Bearer
-    type: apiKey
 swagger: "2.0"

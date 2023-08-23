@@ -70,6 +70,7 @@ func (rc *restyClient) CheckResponse(restyRes *resty.Response, err error, expect
 
 	if restyRes.StatusCode() != expectedStatusCode {
 		logger.ThrowDebugLog("Did not find the expected status code!")
+		logger.ThrowDebugLog(restyRes.StatusCode())
 		var error interface{}
 		if err := json.Unmarshal(restyRes.Body(), &error); err != nil {
 			logger.ThrowDebugLog("error in unmarshalling the response")

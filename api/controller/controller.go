@@ -15,6 +15,7 @@ type PgDbController struct {
 // @Summary Protected Route
 // @Description Access a protected route.
 // @Tags Protected
+// @Security BearerAuth
 // @Success 200 {object} interface{}
 // @Router /application/user [get]
 func (pgControllerObject PgDbController) HttpPost(c *gin.Context)  {

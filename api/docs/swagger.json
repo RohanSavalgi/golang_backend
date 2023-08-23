@@ -6,9 +6,16 @@
         "contact": {},
         "version": "1.0"
     },
+    "host": "localhost:8080",
+    "basePath": "/application",
     "paths": {
         "/application/user": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Access a protected route.",
                 "tags": [
                     "Protected"
@@ -23,13 +30,6 @@
                     }
                 }
             }
-        }
-    },
-    "securityDefinitions": {
-        "JWT": {
-            "type": "apiKey",
-            "name": "Bearer",
-            "in": "header"
         }
     }
 }
